@@ -21,31 +21,24 @@ func NewCustomerHandler(customerService service.CustomerService) *CustomerHandle
 func (h *CustomerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
 	var customer domain.Customer
 	if err := json.NewDecoder(r.Body).Decode(&customer); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.JSONMessage(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if err := h.customerService.CreateCustomer(&customer); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONMessage(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(customer)
+	utils.JSONData(w, customer, http.StatusCreated)
 }
 
 func (h *CustomerHandler) GetCustomer(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	customer, err := h.customerService.GetCustomer(id)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{
-			"message": "No customer found",
-		})
+		utils.JSONMessage(w, "No customer found", http.StatusNotFound)
 		return
 	}
 
@@ -55,7 +48,7 @@ func (h *CustomerHandler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 func (h *CustomerHandler) GetAllCustomers(w http.ResponseWriter, r *http.Request) {
 	customers, err := h.customerService.GetAllCustomers()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONMessage(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -64,7 +57,7 @@ func (h *CustomerHandler) GetAllCustomers(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json.NewEncoder(w).Encode(customers)
+	utils.JSONData(w, customers)
 }
 
 func (h *CustomerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {

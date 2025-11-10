@@ -27,8 +27,12 @@ func JSONResponse(w http.ResponseWriter, status int, data any, message string) {
 }
 
 // JSONData sends a success response with data
-func JSONData(w http.ResponseWriter, data any) {
-	JSONResponse(w, http.StatusOK, data, "Request processed successfully")
+func JSONData(w http.ResponseWriter, data any, status ...int) {
+	s := http.StatusOK
+	if len(status) > 0 {
+		s = status[0]
+	}
+	JSONResponse(w, s, data, "Request processed successfully")
 }
 
 // JSONMessage sends a response with only a message
